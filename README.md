@@ -3,10 +3,13 @@
 ## Artifaqt Roblox Music Bot
 A Music Self-Bot for Roblox
 
+**NOTE: Spotify Premium is needed**
+
 
 ## Setup
 
-Intall requirements.txt
+Install requirements.txt
+Set Spotify Credentials
 Configured for Mic Up
 Best with Multi-Instance
 Configured for two 1920 x 1920 monitors
