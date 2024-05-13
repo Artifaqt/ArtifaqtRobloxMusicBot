@@ -1,0 +1,8 @@
+asyncio
+pyautogui
+pydirectinput
+pygetwindow
+pytesseract
+Pillow
+spotipy
+tesseract
