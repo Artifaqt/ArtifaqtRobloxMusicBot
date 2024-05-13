@@ -1,2 +1,22 @@
 # ArtifaqtRobloxMusicBot
 A Music Self-Bot for Roblox
+
+
+## Setup
+
+Intall requirements.txt
+Configured for Mic Up
+Best with Multi-Instance
+Configured for two 1920 x 1920 monitors
+Roblox must be split on the far right of your right monitor
+
+## Cmds
+
+`AMBp <song> by <artist>`
+
+Searches and queues a song
+Example: `AMBp Jealousy by RUBII`
+
+`AMBnp`
+
+Says what song is currently playing 
