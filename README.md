@@ -1,4 +1,6 @@
-# ArtifaqtRobloxMusicBot
+# THIS IS AGAINST ROBLOX TOS. I AM NOT RESPONSIBLE FOR ACTIONS TAKEN AGAINST YOUR ACCOUNT
+
+## Artifaqt Roblox Music Bot
 A Music Self-Bot for Roblox
 
 
