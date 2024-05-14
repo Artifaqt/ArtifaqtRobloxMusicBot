@@ -14,9 +14,9 @@ class NoMediaRunningException(Exception):
     pass
 
 # Spotify credentials
-SPOTIPY_CLIENT_ID = ''
-SPOTIPY_CLIENT_SECRET = ''
-SPOTIPY_REDIRECT_URI = 'http://localhost:8888'
+SPOTIPY_CLIENT_ID = '31528e8a540b445eb3f2799fc8591f66'
+SPOTIPY_CLIENT_SECRET = '40c27d4c00474cbd9e0f4180633b0ce1'
+SPOTIPY_REDIRECT_URI = 'http://localhost:25565'
 
 # Function to retrieve media information
 async def get_media_info():
@@ -106,11 +106,12 @@ def main():
             roblox_windows = gw.getWindowsWithTitle("Roblox")
             second_monitor_roblox_window = next((window for window in roblox_windows if window.topleft[0] >= 1920), None)
 
-            if second_monitor_roblox_window and first_run == True or ambnp_ready == True:
-                # Bring the Roblox window to the foreground
-                second_monitor_roblox_window.activate()
-                print("Brought Roblox forward")
-                time.sleep(1)  # Add a delay to ensure the window switch is complete
+            try:
+                if second_monitor_roblox_window and (first_run or ambnp_ready):
+                    second_monitor_roblox_window.activate()
+                    print("Brought Roblox forward")
+                    time.sleep(1)
+
 
                 # Simulate pressing the / key
                 pydirectinput.press('/')
@@ -122,8 +123,8 @@ def main():
                 pydirectinput.press("space")
                 first_run = False
 
-            else:
-                print("Roblox window not found on the second monitor.")
+            except gw.PyGetWindowException as e:
+                print(f"Error occurred while activating Roblox window: {e}")
 
         # Check if "AMBp" is present in the recognized text
         if "AMBp" in text_on_screen:
@@ -168,7 +169,7 @@ def main():
                 
                     # Set the flag to True indicating AMBnp has been detected
                     ambnp_ready = False
-        time.sleep(.3)  # Adjust the interval as needed
+        time.sleep(.5)  # Adjust the interval as needed
 
 if __name__ == "__main__":
     main()
