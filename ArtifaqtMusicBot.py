@@ -158,6 +158,7 @@ def main():
                 
                 # If current_media_info is not None, proceed with sending the message
                 if current_media_info:
+                    pyautogui.press('altleft')  # Get that activation hotkey love :) (thank you Raymond Chen)
                     second_monitor_roblox_window.activate()
                     print("Brought Roblox forward")
                     time.sleep(1)  # Add a delay to ensure the window switch is complete
