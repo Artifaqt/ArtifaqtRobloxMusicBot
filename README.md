@@ -18,6 +18,11 @@ Intended to be used with Multi-Instance\
 Configured for two 1920 x 1920 monitors\
 Roblox must be split on the far right of your right monitor
 
+## Tips
+ROblox tags full names, SO instead of like Travis Scott, put Travis.
+You can also just do part of a song title for example if I want FuckAroundAndFly by Marigold
+Id put `AMBp Fuck by Marigold`
+
 ## Cmds
 
 `AMBp <song> by <artist>`
