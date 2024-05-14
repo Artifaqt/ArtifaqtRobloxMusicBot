@@ -108,6 +108,7 @@ def main():
 
             try:
                 if second_monitor_roblox_window and (first_run or ambnp_ready):
+                    pyautogui.press('altleft')  # Get that activation hotkey love :) (thank you Raymond Chen)
                     second_monitor_roblox_window.activate()
                     print("Brought Roblox forward")
                     time.sleep(1)
