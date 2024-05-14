@@ -15,7 +15,7 @@ class NoMediaRunningException(Exception):
 
 # Spotify credentials
 SPOTIPY_CLIENT_ID = '31528e8a540b445eb3f2799fc8591f66'
-SPOTIPY_CLIENT_SECRET = '40c27d4c00474cbd9e0f4180633b0ce1'
+SPOTIPY_CLIENT_SECRET = ''
 SPOTIPY_REDIRECT_URI = 'http://localhost:25565'
 
 # Function to retrieve media information
