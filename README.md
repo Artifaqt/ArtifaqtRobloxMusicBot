@@ -10,13 +10,13 @@ A Music Self-Bot for Roblox
 ## Setup
 
 Install requirements.txt\
-Set Spotify Credentials\
+Set Spotify Credentials
 
 ## Info
 Configured for default roblox chat box\
 Intended to be used with Multi-Instance\
 Configured for two 1920 x 1920 monitors\
-Roblox must be split on the far right of your right monitor\
+Roblox must be split on the far right of your right monitor
 
 ## Cmds
 
