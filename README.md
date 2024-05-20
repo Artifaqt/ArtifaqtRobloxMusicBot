@@ -33,3 +33,7 @@ Example: `AMBp Jealousy by RUBII`
 `AMBnp`
 
 Says what song is currently playing 
+
+`AMBn`
+
+Says whats next in queue
