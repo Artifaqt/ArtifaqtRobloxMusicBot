@@ -131,7 +131,7 @@ async def main():
                     else:
                         print("Same song already queued, skipping...")
 
-        if "AMBnp" in text_on_screen and ambnp_ready:
+        if "AMBrn" in text_on_screen and ambnp_ready:
             if current_media_info:
                 pyautogui.press('altleft')
                 second_monitor_roblox_window.activate()
