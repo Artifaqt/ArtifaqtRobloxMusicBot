@@ -30,6 +30,11 @@ Id put `AMBp Fuck by Marigold`
 Searches and queues a song
 Example: `AMBp Jealousy by RUBII`
 
+`AMBg <genre>`
+
+Searches for a song in that genre and queues it
+Example: `AMBg dubstep`
+
 `AMBrn`
 
 Says what song is currently playing 
