@@ -73,6 +73,42 @@ def queue_song(song_name, artist_name=None):
         print(f"Song '{song_name}' by '{artist_name}' not found on Spotify.")
         return False
 
+# Function to queue a song from a specific genre on Spotify
+def queue_song_by_genre(genre):
+    try:
+        recommendations = sp.recommendations(seed_genres=[genre], limit=1)
+        if recommendations['tracks']:
+            song = recommendations['tracks'][0]
+            song_uri = song['uri']
+            sp.add_to_queue(uri=song_uri)
+            song_name = song['name']
+            artist_name = song['artists'][0]['name']
+            print(f"Added '{song_name}' by '{artist_name}' to Spotify queue.")
+            return song_name, artist_name
+        else:
+            print(f"No recommendations found for genre '{genre}'.")
+            return None, None
+    except Exception as e:
+        print(f"Error retrieving recommendations for genre '{genre}':", e)
+        return None, None
+
+async def activate_roblox_window():
+    roblox_windows = gw.getWindowsWithTitle("Roblox")
+    second_monitor_roblox_window = next((window for window in roblox_windows if window.topleft[0] >= 1920), None)
+
+    if second_monitor_roblox_window:
+        try:
+            pyautogui.press('altleft')
+            second_monitor_roblox_window.activate()
+            print("Brought Roblox forward")
+            await asyncio.sleep(1)
+            return second_monitor_roblox_window
+        except gw.PyGetWindowException as e:
+            print(f"Error occurred while activating Roblox window: {e}")
+    else:
+        print("Roblox window not found on the second monitor.")
+    return None
+
 async def main():
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
     last_queued_song = None
@@ -85,11 +121,11 @@ async def main():
         try:
             current_media_info = await get_media_info()
         except NoMediaRunningException:
-            time.sleep(1.5)
+            await asyncio.sleep(1.5)
             continue
         except Exception as e:
             print("!!!", e, traceback.format_exc())
-            time.sleep(1.5)
+            await asyncio.sleep(1.5)
             continue
 
         song_artist, song_title = (current_media_info['artist'], current_media_info['title'])
@@ -100,22 +136,18 @@ async def main():
             last_song_title = song_title
             last_song_artist = song_artist
             ambnp_ready = True
-            roblox_windows = gw.getWindowsWithTitle("Roblox")
-            second_monitor_roblox_window = next((window for window in roblox_windows if window.topleft[0] >= 1920), None)
-            try:
-                if second_monitor_roblox_window and (first_run or ambnp_ready):
-                    pyautogui.press('altleft')
-                    second_monitor_roblox_window.activate()
-                    print("Brought Roblox forward")
-                    time.sleep(1)
-                pydirectinput.press('/')
-                message = f"Now playing {song_title} by {song_artist}\n"
-                pyautogui.typewrite(message)
-                pydirectinput.press('enter')
-                pydirectinput.press("space")
-                first_run = False
-            except gw.PyGetWindowException as e:
-                print(f"Error occurred while activating Roblox window: {e}")
+
+            roblox_window = await activate_roblox_window()
+            if roblox_window:
+                try:
+                    message = f"Now playing {song_title} by {song_artist}\n"
+                    pydirectinput.press('/')
+                    pyautogui.typewrite(message)
+                    pydirectinput.press('enter')
+                    pydirectinput.press("space")
+                    first_run = False
+                except gw.PyGetWindowException as e:
+                    print(f"Error occurred while typing in Roblox window: {e}")
 
         if "AMBp" in text_on_screen:
             print("Found 'AMBp' to split and extract")
@@ -132,32 +164,57 @@ async def main():
                         print("Same song already queued, skipping...")
 
         if "AMBrn" in text_on_screen and ambnp_ready:
+            print("Found 'AMBrn' on screen!")
             if current_media_info:
-                pyautogui.press('altleft')
-                second_monitor_roblox_window.activate()
-                print("Brought Roblox forward")
-                time.sleep(1)
-                pydirectinput.press('/')
-                pyautogui.typewrite(message)
-                pydirectinput.press('enter')
-                pydirectinput.press("space")
-                ambnp_ready = False
+                roblox_window = await activate_roblox_window()
+                if roblox_window:
+                    try:
+                        message = f"Now playing {current_media_info['title']} by {current_media_info['artist']}\n"
+                        pydirectinput.press('/')
+                        pyautogui.typewrite(message)
+                        pydirectinput.press('enter')
+                        pydirectinput.press("space")
+                        ambnp_ready = False
+                    except gw.PyGetWindowException as e:
+                        print(f"Error occurred while typing in Roblox window: {e}")
 
         if "AMBn" in text_on_screen:
+            print("Found 'AMBn' on screen!")
             next_song_title, next_song_artist = get_next_song_in_queue()
             if next_song_title and next_song_artist:
                 message = f"Next song in queue is {next_song_title} by {next_song_artist}\n"
-                pyautogui.press('altleft')
-                second_monitor_roblox_window.activate()
-                time.sleep(1)
-                pydirectinput.press('/')
-                pyautogui.typewrite(message)
-                pydirectinput.press('enter')
-                pydirectinput.press("space")
+                roblox_window = await activate_roblox_window()
+                if roblox_window:
+                    try:
+                        pydirectinput.press('/')
+                        pyautogui.typewrite(message)
+                        pydirectinput.press('enter')
+                        pydirectinput.press("space")
+                    except gw.PyGetWindowException as e:
+                        print(f"Error occurred while typing in Roblox window: {e}")
             else:
-                print("No song found in the queue or an error occurred.")
+                print("Queue is empty. No next song to announce.")
 
-        time.sleep(0.5)
+        if "AMBg" in text_on_screen:
+            print("Found 'AMBg' to queue a song of a specific genre")
+            parts = text_on_screen.split("AMBg", 1)
+            if len(parts) == 2:
+                genre = parts[1].strip()
+                if genre:
+                    song_name, artist_name = queue_song_by_genre(genre)
+                    if song_name and artist_name:
+                        message = f"A random '{genre}' song added!\n"
+                        roblox_window = await activate_roblox_window()
+                        if roblox_window:
+                            try:
+                                pydirectinput.press('/')
+                                pyautogui.typewrite(message)
+                                pydirectinput.press('enter')
+                                pydirectinput.press("space")
+                            except gw.PyGetWindowException as e:
+                                print(f"Error occurred while typing in Roblox window: {e}")
+
+        await asyncio.sleep(0.5)
 
 if __name__ == "__main__":
     asyncio.run(main())
