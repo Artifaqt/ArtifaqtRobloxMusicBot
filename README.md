@@ -30,7 +30,7 @@ Id put `AMBp Fuck by Marigold`
 Searches and queues a song
 Example: `AMBp Jealousy by RUBII`
 
-`AMBnp`
+`AMBrn`
 
 Says what song is currently playing 
 
