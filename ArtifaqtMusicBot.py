@@ -1,4 +1,3 @@
-import time
 import traceback
 import asyncio
 import pyautogui
@@ -17,12 +16,13 @@ class NoMediaRunningException(Exception):
 SPOTIPY_CLIENT_ID = ''
 SPOTIPY_CLIENT_SECRET = ''
 SPOTIPY_REDIRECT_URI = 'http://localhost:25565'
+SCOPE = "user-read-playback-state user-modify-playback-state"
 
 # Initialize Spotify client
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIPY_CLIENT_ID,
                                                client_secret=SPOTIPY_CLIENT_SECRET,
                                                redirect_uri=SPOTIPY_REDIRECT_URI,
-                                               scope="user-read-playback-state user-modify-playback-state"))
+                                               scope=SCOPE))
 
 # Function to retrieve media information
 async def get_media_info():
@@ -66,12 +66,14 @@ def queue_song(song_name, artist_name=None):
         results = sp.search(q=song_name, limit=1, type='track')
     if results['tracks']['items']:
         song_uri = results['tracks']['items'][0]['uri']
+        track = results['tracks']['items'][0]
+        song_name = track['name']
         sp.add_to_queue(uri=song_uri)
         print(f"Added '{song_name}' to Spotify queue.")
-        return True
+        return True, song_name
     else:
         print(f"Song '{song_name}' by '{artist_name}' not found on Spotify.")
-        return False
+        return False, None
 
 # Function to queue a song from a specific genre on Spotify
 def queue_song_by_genre(genre):
@@ -92,6 +94,7 @@ def queue_song_by_genre(genre):
         print(f"Error retrieving recommendations for genre '{genre}':", e)
         return None, None
 
+# Function to activate the Roblox window
 async def activate_roblox_window():
     roblox_windows = gw.getWindowsWithTitle("Roblox")
     second_monitor_roblox_window = next((window for window in roblox_windows if window.topleft[0] >= 1920), None)
@@ -109,13 +112,29 @@ async def activate_roblox_window():
         print("Roblox window not found on the second monitor.")
     return None
 
+# Function to get the most recent queued track
+def get_most_recent_queued_track():
+    try:
+        queue = sp.queue()
+        queue_tracks = queue['queue']
+        
+        if queue_tracks:
+            most_recent_track = queue_tracks[-1]  # Get the last track in the queue
+            track_name = most_recent_track['name']
+            track_artists = ', '.join(artist['name'] for artist in most_recent_track['artists'])
+            return track_name, track_artists
+        else:
+            return None, None
+        
+    except spotipy.SpotifyException as e:
+        print(f"Error retrieving queue: {e}")
+
+# Main function
 async def main():
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
     last_queued_song = None
     last_song_title = None
     last_song_artist = None
-    ambnp_ready = None
-    first_run = True
 
     while True:
         try:
@@ -135,17 +154,15 @@ async def main():
         if song_title != last_song_title or song_artist != last_song_artist:
             last_song_title = song_title
             last_song_artist = song_artist
-            ambnp_ready = True
 
             roblox_window = await activate_roblox_window()
             if roblox_window:
                 try:
-                    message = f"Now playing {song_title} by {song_artist}\n"
+                    message = f"Now playing: {song_title} by {song_artist}\n"
                     pydirectinput.press('/')
                     pyautogui.typewrite(message)
                     pydirectinput.press('enter')
                     pydirectinput.press("space")
-                    first_run = False
                 except gw.PyGetWindowException as e:
                     print(f"Error occurred while typing in Roblox window: {e}")
 
@@ -157,24 +174,47 @@ async def main():
                 if len(song_info) == 2:
                     song_name, artist_name = song_info
                     if song_name != last_queued_song:
-                        queue_song(song_name, artist_name)
-                        last_queued_song = song_name
-                        print("Queued Request Seen")
+                        success, track_name = queue_song(song_name, artist_name)
+                        if success:
+                            last_queued_song = song_name
+                            await asyncio.sleep(.2)
+                            message = f"Queued: {track_name}!"
+                            roblox_window = await activate_roblox_window()
+                            if roblox_window:
+                                try:
+                                    pydirectinput.press('/')
+                                    pyautogui.typewrite(message)
+                                    pydirectinput.press('enter')
+                                    pydirectinput.press("space")
+                                except gw.PyGetWindowException as e:
+                                    print(f"Error occurred while typing in Roblox window: {e}")
+                            print("Queued Request Seen")
+                        else:
+                            print(f"Failed to queue the song: {song_name} by {artist_name}")
+                            message = f"Error queuing the song, please try again!"
+                            roblox_window = await activate_roblox_window()
+                            if roblox_window:
+                                try:
+                                    pydirectinput.press('/')
+                                    pyautogui.typewrite(message)
+                                    pydirectinput.press('enter')
+                                    pydirectinput.press('space')
+                                except gw.PyGetWindowException as e:
+                                    print(f"Error occurred while typing in Roblox window: {e}")
                     else:
                         print("Same song already queued, skipping...")
 
-        if "AMBrn" in text_on_screen and ambnp_ready:
+        if "AMBrn" in text_on_screen:
             print("Found 'AMBrn' on screen!")
             if current_media_info:
                 roblox_window = await activate_roblox_window()
                 if roblox_window:
                     try:
-                        message = f"Now playing {current_media_info['title']} by {current_media_info['artist']}\n"
+                        message = f"Now playing: {current_media_info['title']} by {current_media_info['artist']}\n"
                         pydirectinput.press('/')
                         pyautogui.typewrite(message)
                         pydirectinput.press('enter')
                         pydirectinput.press("space")
-                        ambnp_ready = False
                     except gw.PyGetWindowException as e:
                         print(f"Error occurred while typing in Roblox window: {e}")
 
@@ -182,7 +222,7 @@ async def main():
             print("Found 'AMBn' on screen!")
             next_song_title, next_song_artist = get_next_song_in_queue()
             if next_song_title and next_song_artist:
-                message = f"Next song in queue is {next_song_title} by {next_song_artist}\n"
+                message = f"Next song in queue is: {next_song_title} by {next_song_artist}\n"
                 roblox_window = await activate_roblox_window()
                 if roblox_window:
                     try:
@@ -218,6 +258,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-# {
-#  "genres": ["acoustic", "afrobeat", "alt-rock", "alternative", "ambient", "anime", "black-metal", "bluegrass", "blues", "bossanova", "brazil", "breakbeat", "british", "cantopop", "chicago-house", "children", "chill", "classical", "club", "comedy", "country", "dance", "dancehall", "death-metal", "deep-house", "detroit-techno", "disco", "disney", "drum-and-bass", "dub", "dubstep", "edm", "electro", "electronic", "emo", "folk", "forro", "french", "funk", "garage", "german", "gospel", "goth", "grindcore", "groove", "grunge", "guitar", "happy", "hard-rock", "hardcore", "hardstyle", "heavy-metal", "hip-hop", "holidays", "honky-tonk", "house", "idm", "indian", "indie", "indie-pop", "industrial", "iranian", "j-dance", "j-idol", "j-pop", "j-rock", "jazz", "k-pop", "kids", "latin", "latino", "malay", "mandopop", "metal", "metal-misc", "metalcore", "minimal-techno", "movies", "mpb", "new-age", "new-release", "opera", "pagode", "party", "philippines-opm", "piano", "pop", "pop-film", "post-dubstep", "power-pop", "progressive-house", "psych-rock", "punk", "punk-rock", "r-n-b", "rainy-day", "reggae", "reggaeton", "road-trip", "rock", "rock-n-roll", "rockabilly", "romance", "sad", "salsa", "samba", "sertanejo", "show-tunes", "singer-songwriter", "ska", "sleep", "songwriter", "soul", "soundtracks", "spanish", "study", "summer", "swedish", "synth-pop", "tango", "techno", "trance", "trip-hop", "turkish", "work-out", "world-music"]
-# }
