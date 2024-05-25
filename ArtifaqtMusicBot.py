@@ -1,3 +1,5 @@
+import cv2
+import numpy as np
 import traceback
 import asyncio
 import pyautogui
@@ -11,6 +13,12 @@ from spotipy.oauth2 import SpotifyOAuth
 
 class NoMediaRunningException(Exception):
     pass
+
+# Bot Commands
+cmd_Play = 'AMBp'
+cmd_Playing = 'AMBnp'
+cmd_Next =  'AMBn'
+cmd_Genre = 'AMBg'
 
 # Spotify credentials
 SPOTIPY_CLIENT_ID = ''
@@ -167,7 +175,7 @@ async def main():
                 except gw.PyGetWindowException as e:
                     print(f"Error occurred while typing in Roblox window: {e}")
 
-        if "AMBp" in text_on_screen:
+        if cmd_Play in text_on_screen:
             print("Found 'AMBp' to split and extract")
             parts = text_on_screen.split("AMBp", 1)
             if len(parts) == 2:
@@ -205,7 +213,7 @@ async def main():
                     else:
                         print("Same song already queued, skipping...")
 
-        if "AMBrn" in text_on_screen:
+        if cmd_Playing in text_on_screen:
             print("Found 'AMBrn' on screen!")
             if current_media_info:
                 roblox_window = await activate_roblox_window()
@@ -219,7 +227,7 @@ async def main():
                     except gw.PyGetWindowException as e:
                         print(f"Error occurred while typing in Roblox window: {e}")
 
-        if "AMBn" in text_on_screen:
+        if cmd_Next in text_on_screen:
             print("Found 'AMBn' on screen!")
             next_song_title, next_song_artist = get_next_song_in_queue()
             if next_song_title and next_song_artist:
@@ -236,7 +244,7 @@ async def main():
             else:
                 print("Queue is empty. No next song to announce.")
 
-        if "AMBg" in text_on_screen:
+        if cmd_Genre in text_on_screen:
             print("Found 'AMBg' to queue a song of a specific genre")
             parts = text_on_screen.split("AMBg", 1)
             if len(parts) == 2:
