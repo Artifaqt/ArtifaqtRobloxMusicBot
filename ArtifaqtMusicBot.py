@@ -41,8 +41,9 @@ async def get_media_info():
 # Function to perform OCR within the specified box
 def perform_ocr():
     box = (2890, 307, 3240, 330)
-    screenshot = ImageGrab.grab(bbox=box, include_layered_windows=False, all_screens=True)
-    text = pytesseract.image_to_string(screenshot)
+    screenshot = ImageGrab.grab(bbox=box, include_layered_windows=False, all_screens=True).convert('L')
+    ret,screenshot = cv2.threshold(np.array(screenshot), 125, 255, cv2.THRESH_BINARY)
+    text = pytesseract.image_to_string(screenshot, config='--psm 7')
     return text.strip()
 
 # Function to get the next song in the Spotify queue
