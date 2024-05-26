@@ -16,7 +16,7 @@ class NoMediaRunningException(Exception):
 
 # Bot Commands
 cmd_Play = 'AMBp'
-cmd_Playing = 'AMBnp'
+cmd_Playing = 'AMBrn'
 cmd_Next =  'AMBn'
 cmd_Genre = 'AMBg'
 
